@@ -9,6 +9,7 @@ import './App.css';
 function App() {
   const [tasks, setTasks] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+  const [taskToEdit, setTaskToEdit] = useState(null);
 
   // Load tasks from Chrome storage
   useEffect(() => {
@@ -32,8 +33,22 @@ function App() {
     setTasks(updatedTasks);
   };
 
+  const editTask = (index) => {
+    setTaskToEdit(tasks[index]);
+    setTabValue(0); // Navigate to the Create tab
+  };
+
+  const handleEditTask = (updatedTask) => {
+    const updatedTasks = tasks.map((task) =>
+      task.jobNo === updatedTask.jobNo ? updatedTask : task
+    );
+    setTasks(updatedTasks);
+    setTaskToEdit(null); // Reset task to edit
+  };
+
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+    setTaskToEdit(null); // Reset task to edit when switching tabs
   };
 
   return (
@@ -42,8 +57,20 @@ function App() {
         <Tab label="Create" />
         <Tab label="View" />
       </Tabs>
-      {tabValue === 0 && <CreateTaskForm addTask={addTask} />}
-      {tabValue === 1 && <TaskList tasks={tasks} updateTask={updateTask} />}
+      {tabValue === 0 && (
+        <CreateTaskForm
+          addTask={addTask}
+          editTask={handleEditTask}
+          taskToEdit={taskToEdit}
+        />
+      )}
+      {tabValue === 1 && (
+        <TaskList
+          tasks={tasks}
+          updateTask={updateTask}
+          editTask={editTask}
+        />
+      )}
     </Box>
   );
 }

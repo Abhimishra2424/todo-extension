@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 
-const CreateTaskForm = ({ addTask }) => {
+const CreateTaskForm = ({ addTask, editTask, taskToEdit }) => {
   const [jobNo, setJobNo] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('Pending');
+
+  // Pre-fill form if editing a task
+  useEffect(() => {
+    if (taskToEdit) {
+      setJobNo(taskToEdit.jobNo);
+      setDescription(taskToEdit.description);
+      setStatus(taskToEdit.status);
+    }
+  }, [taskToEdit]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,7 +24,16 @@ const CreateTaskForm = ({ addTask }) => {
       description,
       status,
     };
-    addTask(newTask);
+
+    if (taskToEdit) {
+      // If editing, update the task
+      editTask(newTask);
+    } else {
+      // If creating, add a new task
+      addTask(newTask);
+    }
+
+    // Reset form
     setJobNo('');
     setDescription('');
     setStatus('Pending');
@@ -36,6 +54,7 @@ const CreateTaskForm = ({ addTask }) => {
         required
         multiline
         rows={4}
+        inputProps={{ maxLength: 300 }} // Limit description to 300 characters
       />
       <FormControl fullWidth>
         <InputLabel>Status</InputLabel>
@@ -50,7 +69,7 @@ const CreateTaskForm = ({ addTask }) => {
         </Select>
       </FormControl>
       <Button type="submit" variant="contained" color="primary">
-        Add Task
+        {taskToEdit ? 'Update Task' : 'Add Task'}
       </Button>
     </Box>
   );
