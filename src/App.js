@@ -1,56 +1,50 @@
 /* global chrome */
+
 import React, { useState, useEffect } from 'react';
+import { Tabs, Tab, Box } from '@mui/material';
+import CreateTaskForm from './components/CreateTaskForm';
+import TaskList from './components/TaskList';
 import './App.css';
 
 function App() {
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState('');
+  const [tasks, setTasks] = useState([]);
+  const [tabValue, setTabValue] = useState(0);
 
+  // Load tasks from Chrome storage
   useEffect(() => {
-    chrome.storage.sync.get(['todos'], (result) => {
-      if (result.todos) {
-        setTodos(result.todos);
+    chrome.storage.sync.get(['tasks'], (result) => {
+      if (result.tasks) {
+        setTasks(result.tasks);
       }
     });
   }, []);
 
+  // Save tasks to Chrome storage
   useEffect(() => {
-    chrome.storage.sync.set({ todos });
-  }, [todos]);
+    chrome.storage.sync.set({ tasks });
+  }, [tasks]);
 
-  const addTodo = () => {
-    if (input.trim()) {
-      setTodos([...todos, input]);
-      setInput('');
-    }
+  const addTask = (newTask) => {
+    setTasks([...tasks, newTask]);
   };
 
-  const removeTodo = (index) => {
-    const newTodos = todos.filter((_, i) => i !== index);
-    setTodos(newTodos);
+  const updateTask = (updatedTasks) => {
+    setTasks(updatedTasks);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
   };
 
   return (
-    <div className="App">
-      <h1>TODO List</h1>
-      <div className="todo-container">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add a new task"
-        />
-        <button onClick={addTodo}>Add</button>
-      </div>
-      <ul>
-        {todos.map((todo, index) => (
-          <li key={index}>
-            {todo}
-            <button onClick={() => removeTodo(index)}>Remove</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Box sx={{ width: '400px', padding: 2 }}>
+      <Tabs value={tabValue} onChange={handleTabChange} centered>
+        <Tab label="Create" />
+        <Tab label="View" />
+      </Tabs>
+      {tabValue === 0 && <CreateTaskForm addTask={addTask} />}
+      {tabValue === 1 && <TaskList tasks={tasks} updateTask={updateTask} />}
+    </Box>
   );
 }
 
